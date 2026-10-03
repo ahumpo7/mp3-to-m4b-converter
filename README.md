@@ -30,11 +30,28 @@ A fast, modern web application designed to convert MP3 audiobooks and podcasts i
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Run From Anywhere (Phone, Tablet, or PC)
 
-### Option A: Run Anywhere with Docker (Recommended)
+### Option 1: 1-Click Free Cloud Deployment (Access from any phone or browser)
 
-No need to install Node or FFmpeg manually:
+Deploy this app to **Render** directly from your GitHub repo with 1 click:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ahumpo7/mp3-to-m4b-converter)
+
+Once deployed, you get a public HTTPS URL (e.g. `https://mp3-to-m4b.onrender.com`) that you can open in Safari or Chrome on your phone, tablet, or any computer.
+
+---
+
+### Option 2: Run on your phone over Local Wi-Fi (Instant)
+
+If your computer is running this app (`npm start` or `docker compose up -d`), you can open it on your phone right now:
+1. Make sure your phone is connected to the same Wi-Fi network as your computer.
+2. Open Safari / Chrome on your phone and go to:
+   `http://<your-computer-ip>:3000` (e.g. `http://192.168.1.13:3000`)
+
+---
+
+### Option 3: Run with Docker
 
 ```bash
 docker compose up -d
@@ -43,7 +60,7 @@ Then open [http://localhost:3000](http://localhost:3000).
 
 ---
 
-### Option B: Run Locally with Node.js
+### Option 4: Run Locally with Node.js
 
 #### Prerequisites
 - [Node.js](https://nodejs.org) (v18+)

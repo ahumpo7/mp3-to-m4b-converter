@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: mp3-to-m4b-converter
+    env: docker
+    plan: free
+    branch: main
+    healthCheckPath: /api/status
