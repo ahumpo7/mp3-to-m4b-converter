@@ -72,7 +72,7 @@ function runFfprobe(filePath) {
 /**
  * Extract all metadata, chapters, and cover art from an audio file
  */
-async function extractMetadata(filePath) {
+async function extractMetadata(filePath, fileId = null, uploadsDir = null) {
   let probeData = null;
   let mmData = null;
 
@@ -108,11 +108,40 @@ async function extractMetadata(filePath) {
   // Extract cover picture
   let coverDataUrl = null;
   let coverFormat = null;
+  let coverFilePath = null;
+
   if (common.picture && common.picture.length > 0) {
     const pic = common.picture[0];
     coverFormat = pic.format;
-    const base64 = Buffer.from(pic.data).toString('base64');
-    coverDataUrl = `data:${pic.format};base64,${base64}`;
+    const buf = Buffer.from(pic.data);
+    coverDataUrl = `data:${pic.format};base64,${buf.toString('base64')}`;
+    if (uploadsDir && fileId) {
+      const ext = pic.format && pic.format.includes('png') ? '.png' : '.jpg';
+      coverFilePath = path.join(uploadsDir, `${fileId}_cover${ext}`);
+      try {
+        fs.writeFileSync(coverFilePath, buf);
+      } catch (err) {
+        console.warn('Failed to write cover image to disk:', err.message);
+      }
+    }
+  }
+
+  // Fallback: If music-metadata did not extract picture, but ffprobe detected a video/cover stream
+  if (!coverFilePath && uploadsDir && fileId && probeData && probeData.streams && probeData.streams.some(s => s.codec_type === 'video')) {
+    try {
+      const { execFileSync } = require('child_process');
+      const { ffmpegPath } = require('../ffmpeg-finder');
+      const fallbackCover = path.join(uploadsDir, `${fileId}_cover.jpg`);
+      execFileSync(ffmpegPath, ['-i', filePath, '-an', '-vcodec', 'copy', fallbackCover, '-y'], { stdio: 'ignore' });
+      if (fs.existsSync(fallbackCover) && fs.statSync(fallbackCover).size > 0) {
+        coverFilePath = fallbackCover;
+        const buf = fs.readFileSync(fallbackCover);
+        coverDataUrl = `data:image/jpeg;base64,${buf.toString('base64')}`;
+        coverFormat = 'image/jpeg';
+      }
+    } catch (e) {
+      console.warn('Cover extraction fallback failed:', e.message);
+    }
   }
 
   // Unified metadata fields
@@ -164,6 +193,7 @@ async function extractMetadata(filePath) {
     channelLayout,
     hasCover: !!coverDataUrl,
     coverDataUrl,
+    coverFilePath,
     coverFormat,
     metadata: {
       title,

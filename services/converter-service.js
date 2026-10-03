@@ -78,48 +78,62 @@ function convertToM4b({
   chapters = [],
   totalDuration = 0,
   newCoverPath = null,
+  originalCoverPath = null,
   keepOriginalCover = true,
   audioOptions = {}
 }) {
   const emitter = new EventEmitter();
 
+  // If no chapters provided, guarantee at least 1 default chapter spanning the full audio
+  let finalChapters = Array.isArray(chapters) && chapters.length > 0 ? chapters : [];
+  if (finalChapters.length === 0) {
+    finalChapters = [{
+      id: 1,
+      start: 0,
+      end: totalDuration > 0 ? totalDuration : 1,
+      title: metadata.title || 'Chapter 1'
+    }];
+  }
+
   // 1. Create temp metadata file
   const metaDir = path.dirname(outputFilePath);
   const metaFilePath = path.join(metaDir, `meta_${Date.now()}_${Math.random().toString(36).slice(2, 7)}.txt`);
-  const metaContent = generateFFMetadata({ metadata, chapters, totalDuration });
+  const metaContent = generateFFMetadata({ metadata, chapters: finalChapters, totalDuration });
   fs.writeFileSync(metaFilePath, metaContent, 'utf8');
+
+  // Determine cover image file to use
+  let coverImageToUse = null;
+  if (newCoverPath && fs.existsSync(newCoverPath)) {
+    coverImageToUse = newCoverPath;
+  } else if (keepOriginalCover && originalCoverPath && fs.existsSync(originalCoverPath)) {
+    coverImageToUse = originalCoverPath;
+  }
 
   // 2. Build FFmpeg command arguments
   const args = [];
 
-  // Input #0: audio
+  // Input #0: audio file
   args.push('-i', inputFilePath);
 
   let metaInputIndex = 1;
   let coverInputIndex = -1;
 
-  // New cover image
-  if (newCoverPath && fs.existsSync(newCoverPath)) {
-    args.push('-i', newCoverPath);
+  // Input #1 (optional): Standalone cover image file
+  if (coverImageToUse) {
+    args.push('-i', coverImageToUse);
     coverInputIndex = 1;
     metaInputIndex = 2;
   }
 
-  // Metadata input
+  // Input (next): FFMETADATA file
   args.push('-i', metaFilePath);
 
   // Audio stream mapping
   args.push('-map', '0:a');
 
-  // Video / Cover art stream mapping
-  if (newCoverPath && fs.existsSync(newCoverPath)) {
-    // Map newly uploaded cover image
+  // Video / Cover art stream mapping (mapped from standalone image input)
+  if (coverImageToUse) {
     args.push('-map', `${coverInputIndex}:v`);
-    args.push('-c:v', 'copy');
-    args.push('-disposition:v:0', 'attached_pic');
-  } else if (keepOriginalCover) {
-    // Try to map original cover if present in input
-    args.push('-map', '0:v?');
     args.push('-c:v', 'copy');
     args.push('-disposition:v:0', 'attached_pic');
   }

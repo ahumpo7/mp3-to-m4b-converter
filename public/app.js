@@ -249,7 +249,21 @@ function initializeStudio(data) {
   currentFileId = data.fileId;
   totalDuration = data.duration || 0;
   originalMetadata = data.metadata || {};
-  chapters = Array.isArray(data.chapters) ? [...data.chapters] : [];
+
+  if (Array.isArray(data.chapters) && data.chapters.length > 0) {
+    chapters = [...data.chapters];
+  } else {
+    const defaultTitle = originalMetadata.title || data.originalName.replace(/\.[^/.]+$/, '');
+    chapters = [{
+      id: 1,
+      start: 0,
+      end: totalDuration,
+      startTimeStr: '00:00:00',
+      endTimeStr: formatTime(totalDuration),
+      durationStr: formatTime(totalDuration),
+      title: defaultTitle
+    }];
+  }
   hasOriginalCover = !!data.hasCover;
   customCoverFile = null;
   keepCover = hasOriginalCover;

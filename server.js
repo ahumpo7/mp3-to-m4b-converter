@@ -101,7 +101,7 @@ app.post('/api/analyze', upload.single('audio'), async (req, res) => {
 
     console.log(`Analyzing uploaded file: ${req.file.originalname} (${filePath})`);
 
-    const analysis = await extractMetadata(filePath);
+    const analysis = await extractMetadata(filePath, fileId, UPLOADS_DIR);
 
     // Save info in cache
     uploadedFiles.set(fileId, {
@@ -187,6 +187,7 @@ app.post('/api/convert', upload.single('newCover'), async (req, res) => {
       chapters,
       totalDuration: fileInfo.analysis.duration || 0,
       newCoverPath,
+      originalCoverPath: fileInfo.analysis ? fileInfo.analysis.coverFilePath : null,
       keepOriginalCover,
       audioOptions
     });
