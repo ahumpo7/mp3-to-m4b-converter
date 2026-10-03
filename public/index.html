@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MP3 to M4B Studio — Fast Audiobook Converter with Chapters & Info</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <div class="logo-area">
+          <div class="logo-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+              <path d="M6 6h10"/>
+              <path d="M6 10h7"/>
+              <path d="m15 16 3-3 3 3"/>
+              <path d="M18 13v6"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="logo-title">MP3 <span class="gradient-text">to M4B</span> Studio</h1>
+            <p class="logo-subtitle">Lossless Audiobook Converter with Complete Chapter & Metadata Preservation</p>
+          </div>
+        </div>
+
+        <div class="header-badges">
+          <span class="pill-badge pill-purple">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            ID3v2 Chapters
+          </span>
+          <span class="pill-badge pill-blue">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Apple Books Ready
+          </span>
+          <span class="pill-badge pill-green">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Cover Art Intact
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-container">
+      <!-- Section 1: Upload Dropzone -->
+      <section id="uploadSection" class="upload-section card">
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="fileInput" accept=".mp3,.m4a,.aac,.flac,.wav,.ogg" class="file-input-hidden">
+          <div class="dropzone-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <h2 class="dropzone-title">Drop your MP3 file here or <span class="highlight">browse</span></h2>
+          <p class="dropzone-hint">Preserves all existing chapter markers, title, author, narrator, year, and cover art</p>
+          <div class="dropzone-specs">
+            <span>Supports MP3, M4A, FLAC, WAV</span>
+            <span>•</span>
+            <span>Up to 2GB files</span>
+            <span>•</span>
+            <span>Fast native FFmpeg processing</span>
+          </div>
+        </div>
+
+        <!-- Uploading / Analyzing Spinner -->
+        <div id="uploadProgressContainer" class="upload-progress-container hidden">
+          <div class="spinner"></div>
+          <div class="upload-progress-text">
+            <h3 id="uploadStatusTitle">Uploading & Analyzing Audio...</h3>
+            <p id="uploadStatusDesc">Extracting ID3v2 chapter frames, embedded cover art, and audio metadata</p>
+          </div>
+          <div class="progress-bar-wrap">
+            <div id="uploadProgressBar" class="progress-bar-fill" style="width: 0%"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Editor & Studio (shown after analysis) -->
+      <section id="studioSection" class="studio-section hidden">
+        <!-- File Summary Bar -->
+        <div class="file-summary-bar card">
+          <div class="file-info-summary">
+            <div class="file-icon-badge">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18V5l12-2v13"/>
+                <circle cx="6" cy="18" r="3"/>
+                <circle cx="18" cy="16" r="3"/>
+              </svg>
+            </div>
+            <div>
+              <h3 id="summaryFileName" class="file-name-truncate">Audiobook.mp3</h3>
+              <div class="file-specs-row">
+                <span id="summaryDuration">00:00:00</span>
+                <span>•</span>
+                <span id="summarySize">0 MB</span>
+                <span>•</span>
+                <span id="summaryBitrate">128 kbps</span>
+                <span>•</span>
+                <span id="summaryChaptersBadge" class="badge-mini">0 chapters</span>
+              </div>
+            </div>
+          </div>
+          <div class="file-summary-actions">
+            <button id="btnChangeFile" class="btn btn-secondary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Choose Different File
+            </button>
+          </div>
+        </div>
+
+        <div class="studio-grid">
+          <!-- Left Column: Cover & Metadata -->
+          <div class="studio-left-col">
+            <!-- Cover Art Card -->
+            <div class="card cover-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                  Cover Artwork
+                </div>
+                <span id="coverStatusBadge" class="badge-mini badge-green">Detected</span>
+              </div>
+
+              <div class="cover-preview-wrapper">
+                <div id="coverPlaceholder" class="cover-placeholder">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                  <span>No cover detected</span>
+                </div>
+                <img id="coverImage" class="cover-image hidden" alt="Audiobook Cover Preview">
+              </div>
+
+              <div class="cover-actions">
+                <label class="btn btn-secondary btn-sm cover-upload-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Change Cover
+                  <input type="file" id="coverFileInput" accept="image/jpeg,image/png,image/webp" class="file-input-hidden">
+                </label>
+                <button id="btnRemoveCover" class="btn btn-danger-ghost btn-sm" title="Remove cover from output">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/></svg>
+                  Remove
+                </button>
+              </div>
+            </div>
+
+            <!-- Metadata Card -->
+            <div class="card metadata-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  Audiobook Metadata
+                </div>
+                <span class="info-tooltip" title="These tags will be permanently embedded into the M4B container">Info</span>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group form-col-span-2">
+                  <label for="metaTitle">Book Title</label>
+                  <input type="text" id="metaTitle" class="form-control" placeholder="e.g. The Hobbit">
+                </div>
+
+                <div class="form-group">
+                  <label for="metaArtist">Author / Artist</label>
+                  <input type="text" id="metaArtist" class="form-control" placeholder="e.g. J.R.R. Tolkien">
+                </div>
+
+                <div class="form-group">
+                  <label for="metaComposer">Narrator / Narrated By</label>
+                  <input type="text" id="metaComposer" class="form-control" placeholder="e.g. Rob Inglis">
+                </div>
+
+                <div class="form-group">
+                  <label for="metaAlbum">Series / Album</label>
+                  <input type="text" id="metaAlbum" class="form-control" placeholder="e.g. The Lord of the Rings">
+                </div>
+
+                <div class="form-group form-row-2">
+                  <div>
+                    <label for="metaYear">Year / Date</label>
+                    <input type="text" id="metaYear" class="form-control" placeholder="e.g. 2024">
+                  </div>
+                  <div>
+                    <label for="metaGenre">Genre</label>
+                    <input type="text" id="metaGenre" class="form-control" placeholder="Audiobook" value="Audiobook">
+                  </div>
+                </div>
+
+                <div class="form-group form-col-span-2">
+                  <label for="metaComment">Description / Notes</label>
+                  <textarea id="metaComment" class="form-control form-textarea" rows="2" placeholder="Synopsis, edition notes, or chapter description..."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Chapters & Timeline -->
+          <div class="studio-right-col">
+            <div class="card chapters-card">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                  Chapters (<span id="chapterCountDisplay">0</span>)
+                </div>
+
+                <div class="chapter-toolbar">
+                  <button id="btnAddChapter" class="btn btn-secondary btn-xs" title="Add a new chapter">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Chapter
+                  </button>
+                  <button id="btnImportChapters" class="btn btn-secondary btn-xs" title="Import chapters from text or CUE sheet">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    Import Text / CUE
+                  </button>
+                  <button id="btnAutoSplit" class="btn btn-secondary btn-xs" title="Split into equal duration chapters">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+                    Auto-Split
+                  </button>
+                  <button id="btnClearChapters" class="btn btn-danger-ghost btn-xs" title="Remove all chapters">
+                    Clear
+                  </button>
+                </div>
+              </div>
+
+              <!-- Visual Chapter Timeline Strip -->
+              <div class="timeline-container">
+                <div class="timeline-label-row">
+                  <span>00:00:00</span>
+                  <span id="timelineMidPoint">01:00:00</span>
+                  <span id="timelineEndPoint">02:00:00</span>
+                </div>
+                <div id="chapterTimelineBar" class="chapter-timeline-bar" title="Interactive Chapter Timeline">
+                  <!-- Filled dynamically with chapter segments -->
+                </div>
+              </div>
+
+              <!-- Chapters Table -->
+              <div class="chapters-table-wrap">
+                <table class="chapters-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 40px">#</th>
+                      <th>Chapter Title</th>
+                      <th style="width: 100px">Start</th>
+                      <th style="width: 100px">End</th>
+                      <th style="width: 80px">Duration</th>
+                      <th style="width: 40px"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="chaptersTableBody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+                <div id="noChaptersNotice" class="no-chapters-notice hidden">
+                  <p>No chapters detected in this MP3 file.</p>
+                  <span class="hint">Use "Add Chapter", "Import Text / CUE", or "Auto-Split" to create chapter markers for your M4B audiobook.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Conversion Options & Start Button -->
+            <div class="card conversion-settings-card">
+              <div class="settings-row">
+                <div class="setting-item">
+                  <label for="optBitrate">Audio Quality (AAC)</label>
+                  <select id="optBitrate" class="form-control form-select">
+                    <option value="64k">64 kbps (Voice / Compact)</option>
+                    <option value="96k">96 kbps (Speech Optimized)</option>
+                    <option value="128k" selected>128 kbps (Standard Audiobook - Recommended)</option>
+                    <option value="192k">192 kbps (High Fidelity)</option>
+                    <option value="256k">256 kbps (Audiophile Quality)</option>
+                  </select>
+                </div>
+
+                <div class="setting-item">
+                  <label for="optChannels">Channels</label>
+                  <select id="optChannels" class="form-control form-select">
+                    <option value="auto" selected>Auto (Match Source)</option>
+                    <option value="1">Mono (Audiobook Standard - Saves 50% Size)</option>
+                    <option value="2">Stereo</option>
+                  </select>
+                </div>
+
+                <div class="setting-item">
+                  <label for="optSampleRate">Sample Rate</label>
+                  <select id="optSampleRate" class="form-control form-select">
+                    <option value="auto" selected>Auto (Match Source)</option>
+                    <option value="44100">44,100 Hz (CD Standard)</option>
+                    <option value="48000">48,000 Hz (Studio)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="convert-cta-wrapper">
+                <button id="btnStartConversion" class="btn btn-primary btn-large">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Convert to M4B Audiobook
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Live Conversion Progress -->
+      <section id="progressSection" class="progress-section card hidden">
+        <div class="progress-header">
+          <div class="pulse-indicator"></div>
+          <div>
+            <h2 id="progressTitle">Converting MP3 to M4B...</h2>
+            <p id="progressSubtitle">Encoding AAC audio and generating QuickTime chapter markers</p>
+          </div>
+        </div>
+
+        <div class="progress-display">
+          <div class="progress-bar-wrap large">
+            <div id="conversionProgressBar" class="progress-bar-fill animated" style="width: 0%"></div>
+          </div>
+          <div class="progress-percent-display">
+            <span id="conversionPercentText">0%</span>
+          </div>
+        </div>
+
+        <div class="progress-stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">Processed Time</span>
+            <span id="statProcessedTime" class="stat-value">00:00:00</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Total Duration</span>
+            <span id="statTotalDuration" class="stat-value">00:00:00</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Conversion Speed</span>
+            <span id="statSpeed" class="stat-value">--</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Estimated Remaining</span>
+            <span id="statEta" class="stat-value">Calculating...</span>
+          </div>
+        </div>
+
+        <div class="progress-footer">
+          <button id="btnCancelConversion" class="btn btn-secondary btn-sm">
+            Cancel Conversion
+          </button>
+        </div>
+      </section>
+
+      <!-- Section 4: Completed / Download Screen -->
+      <section id="completeSection" class="complete-section card hidden">
+        <div class="complete-badge-area">
+          <div class="success-checkmark">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h2>Conversion Complete!</h2>
+          <p id="completeSummaryText">Your M4B audiobook is ready with full chapters and metadata embedded.</p>
+        </div>
+
+        <div class="complete-specs-box">
+          <div class="spec-col">
+            <span class="spec-label">Output File</span>
+            <span id="completeFileName" class="spec-val">audiobook.m4b</span>
+          </div>
+          <div class="spec-col">
+            <span class="spec-label">File Size</span>
+            <span id="completeFileSize" class="spec-val">0 MB</span>
+          </div>
+          <div class="spec-col">
+            <span class="spec-label">Chapters Embedded</span>
+            <span id="completeChapterCount" class="spec-val">0 chapters</span>
+          </div>
+          <div class="spec-col">
+            <span class="spec-label">Container</span>
+            <span class="spec-val">M4B (Faststart + Apple Books)</span>
+          </div>
+        </div>
+
+        <!-- In-Browser Chapter Audio Player Preview -->
+        <div class="audio-player-preview-card">
+          <div class="player-header">
+            <h4>Preview & Test Chapter Seeking</h4>
+            <div class="chapter-jump-control">
+              <label for="playerChapterSelect">Jump to Chapter:</label>
+              <select id="playerChapterSelect" class="form-control form-select-sm">
+                <!-- Filled with chapters -->
+              </select>
+            </div>
+          </div>
+          <audio id="audioPreviewPlayer" controls class="custom-audio-player"></audio>
+        </div>
+
+        <div class="complete-actions">
+          <a id="btnDownloadM4b" href="#" class="btn btn-primary btn-large download-glow">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download M4B Audiobook
+          </a>
+          <button id="btnConvertAnother" class="btn btn-secondary">
+            Convert Another File
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Dialog / Modal: Import Chapters -->
+    <dialog id="importModal" class="modal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3>Import Chapters from Text or CUE</h3>
+          <button id="btnCloseImportModal" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            Paste timestamped tracklists or CUE sheet text. Timestamps like <code>00:00:00</code>, <code>00:00</code>, or CUE <code>INDEX 01</code> are automatically parsed.
+          </p>
+          <textarea id="importTextarea" class="form-control form-textarea" rows="8" placeholder="Example format:
+00:00:00 Introduction
+00:05:30 Chapter 1: The Beginning
+00:24:15 Chapter 2: Into the Wild
+01:05:00 Chapter 3: The Discovery"></textarea>
+          <div id="importPreviewNotice" class="import-preview-badge hidden"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnApplyImport" class="btn btn-primary">Apply Chapters</button>
+          <button id="btnCancelImport" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Dialog / Modal: Auto Split -->
+    <dialog id="splitModal" class="modal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3>Auto-Split Chapters by Duration</h3>
+          <button id="btnCloseSplitModal" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            Evenly split this audio into chapters at a set time interval:
+          </p>
+          <div class="form-group">
+            <label for="splitIntervalSelect">Split Interval:</label>
+            <select id="splitIntervalSelect" class="form-control form-select">
+              <option value="900">Every 15 minutes</option>
+              <option value="1800" selected>Every 30 minutes</option>
+              <option value="2700">Every 45 minutes</option>
+              <option value="3600">Every 1 hour</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="splitPrefixInput">Chapter Name Prefix:</label>
+            <input type="text" id="splitPrefixInput" class="form-control" value="Chapter " placeholder="Chapter ">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnApplySplit" class="btn btn-primary">Generate Chapters</button>
+          <button id="btnCancelSplit" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

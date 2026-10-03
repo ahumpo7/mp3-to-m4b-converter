@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+temp/uploads/*
+temp/outputs/*
+test_sandbox
+.git
+.gitignore
+*.m4b
+*.mp3

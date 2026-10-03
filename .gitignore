@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Temporary uploads and conversion outputs
+temp/
+!temp/.gitkeep
+temp/uploads/*
+temp/outputs/*
+!temp/uploads/.gitkeep
+!temp/outputs/.gitkeep
+
+# Test sandbox and scratch files
+test_sandbox/
+*.m4b
+*.mp3
+*.wav
+
+# OS & IDE metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

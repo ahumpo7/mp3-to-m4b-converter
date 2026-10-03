@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  mp3-to-m4b:
+    build: .
+    container_name: mp3-to-m4b-studio
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+    volumes:
+      - ./temp:/app/temp
